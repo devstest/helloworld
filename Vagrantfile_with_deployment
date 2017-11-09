@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+
+  config.vm.network "forwarded_port", guest: 5000, host: 8081
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+    vb.name = "webapp"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt-get install -yq \
+      python-dev \
+      python-setuptools \
+      python-virtualenv \
+      python-pip \
+      git
+
+    sudo mkdir /var/webapp &&
+    cd /var/webapp &&
+    virtualenv venv &&
+    source venv/bin/activate &&
+    pip install flask &&
+    git clone https://github.com/devstest/helloworld.git helloworld &&
+    cd /var/webapp/helloworld &&
+    python webapp.py
+  SHELL
+  end
